@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Connections Puzzle</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #cceeff; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 320px; margin: 20px auto; }
+        .word { 
+            width: 70px; 
+            height: 70px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #f0f0f0; 
+            border: 2px solid #5a189a; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            transition: all 0.5s ease; 
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .selected { background: #ffb3e6; }
+        .message { font-size: 18px; margin-top: 20px; }
+        .category-container { margin-top: 20px; }
+        .category { font-size: 20px; font-weight: bold; display: none; }
+        .mistakes { font-size: 16px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Happy Birthday! 🎉</h1>
+    <p>Find the four groups of related words!</p>
+    <div class="grid" id="wordGrid"></div>
+    <button onclick="checkGroups()">Submit</button>
+    <p class="message" id="message"></p>
+    <div class="category-container" id="categories"></div>
+    <p class="mistakes">Mistakes remaining: <span id="mistakesCount">4</span></p>
+    
+    <script>
+        const words = [
+            "Cake", "Candle", "Wish", "Balloon",  // Birthday theme
+            "Wordle", "Spelling Bee", "Sudoku", "Mini",  // NYT Games
+            "Rose", "Tulip", "Lily", "Daisy",  // Flowers
+            "Apple", "Banana", "Cherry", "Grape"  // Fruits
+        ];
+        
+        const correctGroups = {
+            "Birthday Items": ["Cake", "Candle", "Wish", "Balloon"],
+            "NYT Games": ["Wordle", "Spelling Bee", "Sudoku", "Mini"],
+            "Flowers": ["Rose", "Tulip", "Lily", "Daisy"],
+            "Fruits": ["Apple", "Banana", "Cherry", "Grape"]
+        };
+        
+        let selected = [];
+        let mistakes = 4;
+        
+        function createGrid() {
+            const grid = document.getElementById("wordGrid");
+            words.sort(() => Math.random() - 0.5);
+            words.forEach(word => {
+                let div = document.createElement("div");
+                div.className = "word";
+                div.innerText = word;
+                div.onclick = () => selectWord(div, word);
+                grid.appendChild(div);
+            });
+        }
+        
+        function selectWord(div, word) {
+            if (selected.includes(word)) {
+                selected = selected.filter(w => w !== word);
+                div.classList.remove("selected");
+            } else if (selected.length < 4) {
+                selected.push(word);
+                div.classList.add("selected");
+            }
+        }
+        
+        function checkGroups() {
+            let foundCategory = null;
+            for (const [category, group] of Object.entries(correctGroups)) {
+                if (group.every(word => selected.includes(word))) {
+                    foundCategory = category;
+                    break;
+                }
+            }
+            
+            if (foundCategory) {
+                if (!document.getElementById(foundCategory)) { // Prevent duplicate category names
+                    animateCategory(foundCategory);
+                }
+                selected.forEach(word => {
+                    let div = Array.from(document.getElementsByClassName("word")).find(d => d.innerText === word);
+                    div.style.transform = "translateY(-50px)";
+                    setTimeout(() => {
+                        div.style.display = "none";
+                    }, 500);
+                });
+            } else {
+                mistakes--;
+                document.getElementById("mistakesCount").innerText = mistakes;
+                if (mistakes === 0) {
+                    document.getElementById("message").innerText = "Game Over! Try again.";
+                    document.querySelectorAll(".word").forEach(div => div.onclick = null);
+                } else {
+                    document.getElementById("message").innerText = "Try again!";
+                }
+            }
+            
+            selected = [];
+            document.querySelectorAll(".selected").forEach(div => div.classList.remove("selected"));
+        }
+        
+        function animateCategory(category) {
+            setTimeout(() => {
+                let categoryDiv = document.createElement("div");
+                categoryDiv.className = "category";
+                categoryDiv.id = category; // Unique ID to prevent duplicates
+                categoryDiv.innerText = category;
+                categoryDiv.style.display = "block";
+                document.getElementById("categories").appendChild(categoryDiv);
+            }, 500);
+        }
+        
+        createGrid();
+    </script>
+</body>
+</html>
