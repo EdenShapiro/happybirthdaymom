@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Connections Puzzle</title>
+    <title>Happy Birthday Mom!</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background-color: #cceeff; }
+        .grid-container { display: flex; flex-direction: column; align-items: center; }
+        .solved-categories { display: flex; flex-direction: column; align-items: center; width: 320px; margin-bottom: 10px; }
+        .category { 
+            width: 100%; 
+            padding: 10px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            border-radius: 5px; 
+            margin: 5px 0; 
+            text-align: center; 
+            color: black;
+        }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 320px; margin: 20px auto; }
         .word { 
             width: 70px; 
@@ -17,43 +29,51 @@
             border: 2px solid #5a189a; 
             border-radius: 5px; 
             cursor: pointer; 
-            transition: all 0.5s ease; 
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
             font-size: 14px;
             font-weight: bold;
         }
         .selected { background: #ffb3e6; }
         .message { font-size: 18px; margin-top: 20px; }
-        .category-container { margin-top: 20px; }
-        .category { font-size: 20px; font-weight: bold; display: none; }
         .mistakes { font-size: 16px; margin-top: 15px; }
+        .easy { background: #FCE77D; } /* Yellow */
+        .medium { background: #92C47C; } /* Green */
+        .hard { background: #B3C6F3; } /* Blue */
+        .very-hard { background: #C6A2D9; } /* Purple */
     </style>
 </head>
 <body>
-    <h1>Happy Birthday! 🎉</h1>
-    <p>Find the four groups of related words!</p>
-    <div class="grid" id="wordGrid"></div>
-    <button onclick="checkGroups()">Submit</button>
+    <h1>Happy Birthday Mom! ❤️ ❤️ ❤️</h1>
+    <p style="font-size: 20px">Find the four groups of related words</p>
+    <div class="grid-container">
+        <div class="solved-categories" id="solvedCategories"></div>
+        <div class="grid" id="wordGrid"></div>
+    </div>
+    <button onclick="checkGroups()" style="padding: 10px 20px; font-size: 18px; margin-top: 20px; border-radius: 5px;">Submit</button>
     <p class="message" id="message"></p>
-    <div class="category-container" id="categories"></div>
-    <p class="mistakes">Mistakes remaining: <span id="mistakesCount">4</span></p>
+    <p class="mistakes" style="font-size: 20px">Mistakes remaining: <span id="mistakesCount" style="font-size: 34px">•  •  •  •</span></p>
     
     <script>
         const words = [
-            "Cake", "Candle", "Wish", "Balloon",  // Birthday theme
-            "Wordle", "Spelling Bee", "Sudoku", "Mini",  // NYT Games
-            "Rose", "Tulip", "Lily", "Daisy",  // Flowers
-            "Apple", "Banana", "Cherry", "Grape"  // Fruits
-        ];
+            "Cake", "Candle", "Wish", "Balloon",  // Birthday theme (Easy)
+            "Cookie", "Arell", "Mom", "Doctor",  
+            "Madam", "Shakira", "Aquasusan", "Sweden", 
+            "Wood", "Vine", "More", "Ago" 
+        ]; 
         
+
+
+ 
         const correctGroups = {
-            "Birthday Items": ["Cake", "Candle", "Wish", "Balloon"],
-            "NYT Games": ["Wordle", "Spelling Bee", "Sudoku", "Mini"],
-            "Flowers": ["Rose", "Tulip", "Lily", "Daisy"],
-            "Fruits": ["Apple", "Banana", "Cherry", "Grape"]
+            "Birthday things": { words: ["Cake", "Candle", "Wish", "Balloon"], difficulty: "easy" },
+            "Names people call you": { words: ["Cookie", "Arell", "Mom", "Doctor"], difficulty: "medium" },
+            "People you love, with a prefix": { words: ["Madam", "Shakira", "Aquasusan", "Sweden"], difficulty: "hard" },
+            "Places you've lived, without the first syllable": { words: ["Wood", "Vine", "More", "Ago"], difficulty: "very-hard" }
         };
         
         let selected = [];
         let mistakes = 4;
+        let solvedCount = 0;
         
         function createGrid() {
             const grid = document.getElementById("wordGrid");
@@ -62,6 +82,10 @@
                 let div = document.createElement("div");
                 div.className = "word";
                 div.innerText = word;
+                div.style.fontSize = "clamp(8px, 2vw, 12px)"; // Responsive font size that scales between 8px and 14px
+                div.style.textOverflow = "ellipsis"; // Add ellipsis if text overflows
+                div.style.whiteSpace = "nowrap"; // Prevent text wrapping
+                div.style.overflow = "hidden"; // Hide overflow
                 div.onclick = () => selectWord(div, word);
                 grid.appendChild(div);
             });
@@ -79,27 +103,18 @@
         
         function checkGroups() {
             let foundCategory = null;
-            for (const [category, group] of Object.entries(correctGroups)) {
-                if (group.every(word => selected.includes(word))) {
-                    foundCategory = category;
+            for (const [category, groupData] of Object.entries(correctGroups)) {
+                if (groupData.words.every(word => selected.includes(word))) {
+                    foundCategory = { name: category, difficulty: groupData.difficulty };
                     break;
                 }
             }
             
             if (foundCategory) {
-                if (!document.getElementById(foundCategory)) { // Prevent duplicate category names
-                    animateCategory(foundCategory);
-                }
-                selected.forEach(word => {
-                    let div = Array.from(document.getElementsByClassName("word")).find(d => d.innerText === word);
-                    div.style.transform = "translateY(-50px)";
-                    setTimeout(() => {
-                        div.style.display = "none";
-                    }, 500);
-                });
+                animateCategory(foundCategory.name, foundCategory.difficulty, selected);
             } else {
                 mistakes--;
-                document.getElementById("mistakesCount").innerText = mistakes;
+                document.getElementById("mistakesCount").innerText = "• ".repeat(mistakes);
                 if (mistakes === 0) {
                     document.getElementById("message").innerText = "Game Over! Try again.";
                     document.querySelectorAll(".word").forEach(div => div.onclick = null);
@@ -112,15 +127,57 @@
             document.querySelectorAll(".selected").forEach(div => div.classList.remove("selected"));
         }
         
-        function animateCategory(category) {
-            setTimeout(() => {
-                let categoryDiv = document.createElement("div");
-                categoryDiv.className = "category";
-                categoryDiv.id = category; // Unique ID to prevent duplicates
-                categoryDiv.innerText = category;
-                categoryDiv.style.display = "block";
-                document.getElementById("categories").appendChild(categoryDiv);
-            }, 500);
+        function animateCategory(category, difficulty, words) {
+            const solvedContainer = document.getElementById("solvedCategories");
+            let newRow = document.createElement("div");
+            newRow.className = `category ${difficulty}`;
+            
+            // Create category title
+            let titleDiv = document.createElement("div");
+            titleDiv.innerText = category;
+            titleDiv.style.marginBottom = "4px"; // Add small margin below title
+            newRow.appendChild(titleDiv);
+            // Create and add words list
+            let wordsList = document.createElement("div");
+            wordsList.className = "category-words";
+            wordsList.innerText = words.join(", ");
+            wordsList.style.fontSize = "0.7em";
+            wordsList.style.fontWeight = "normal";
+            newRow.appendChild(wordsList);
+            
+            solvedContainer.appendChild(newRow);
+            
+            words.forEach(word => {
+                let div = Array.from(document.getElementsByClassName("word")).find(d => d.innerText === word);
+                div.style.transform = "translateY(-" + (solvedCount * 80) + "px)";
+                div.style.opacity = "0";
+                setTimeout(() => {
+                    div.style.display = "none";
+                }, 500);
+            });
+            solvedCount++;
+            if (solvedCount === 4) {
+                const message = document.getElementById("message");
+                message.innerText = "You Win!";
+                message.style.fontSize = "60px";
+                message.style.textShadow = "2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000";
+                message.style.marginTop = "20px";
+                message.style.fontFamily = "Verdana, sans-serif";
+                message.style.color = "#90EE90";
+                message.style.animation = "bounce 1s ease infinite";
+                
+                // Add CSS animation if not already present
+                if (!document.querySelector('#winAnimation')) {
+                    const style = document.createElement('style');
+                    style.id = 'winAnimation';
+                    style.textContent = `
+                        @keyframes bounce {
+                            0%, 100% { transform: translateY(20px); }
+                            50% { transform: translateY(0); }
+                        }`;
+                    document.head.appendChild(style);
+                }
+            }
         }
         
         createGrid();
