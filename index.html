@@ -7,7 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background-color: #cceeff; }
         .grid-container { display: flex; flex-direction: column; align-items: center; }
-        .solved-categories { display: flex; flex-direction: column; align-items: center; width: 320px; margin-bottom: 10px; }
+        .solved-categories { display: flex; flex-direction: column; align-items: center; width: 360px; margin-bottom: 10px; }
         .category { 
             width: 100%; 
             padding: 10px; 
@@ -18,10 +18,10 @@
             text-align: center; 
             color: black;
         }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 320px; margin: 20px auto; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; width: 360px; margin: 20px auto; }
         .word { 
-            width: 70px; 
-            height: 70px; 
+            width: 77px; 
+            height: 77px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -30,7 +30,7 @@
             border-radius: 5px; 
             cursor: pointer; 
             transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
         }
         .selected { background: #ffb3e6; }
@@ -43,7 +43,8 @@
     </style>
 </head>
 <body>
-    <h1>Happy Birthday Mom! ❤️ ❤️ ❤️</h1>
+    <h1>Happy Birthday Mom!</h1>
+    <h1>❤️ ❤️ ❤️</h1>
     <p style="font-size: 20px">Find the four groups of related words</p>
     <div class="grid-container">
         <div class="solved-categories" id="solvedCategories"></div>
@@ -82,7 +83,7 @@
                 let div = document.createElement("div");
                 div.className = "word";
                 div.innerText = word;
-                div.style.fontSize = "clamp(8px, 2vw, 12px)"; // Responsive font size that scales between 8px and 14px
+                div.style.fontSize = "80%"; // Use percentage for better mobile scaling
                 div.style.textOverflow = "ellipsis"; // Add ellipsis if text overflows
                 div.style.whiteSpace = "nowrap"; // Prevent text wrapping
                 div.style.overflow = "hidden"; // Hide overflow
